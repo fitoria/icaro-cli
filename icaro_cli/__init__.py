@@ -123,8 +123,7 @@ def compilar_archivo(archivo_fuente=SOURCE_FILE, archivo_salida=OUTPUT_FILE):
 
 def enlazar_archivo():
     '''Enlaza el archivo y produce el binario'''
-    #TODO: probar que detecte que esto
-    compiler = 'sdcc' #'sdcc-sdcc'
+    compiler = 'sdcc' if os_name == 'Darwin' else 'sdcc-sdcc'
     comando = "%s %s" % (compiler, ' '.join(PARAMETROS_BINARIO))
     return comando
 
