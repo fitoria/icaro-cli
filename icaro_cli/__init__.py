@@ -125,7 +125,7 @@ def cargar(nombre_archivo=HEX_FILE):
             vivo = False
     docker.buscar_bus_docker = False
 
-if __name__ == "__main__":
+def main():
     print "COMPILANDO"
     salida = compilar_archivo()
     os.system(salida)
@@ -134,3 +134,6 @@ if __name__ == "__main__":
     os.system(salida)
     print "CARGANDO"
     cargar()
+
+if __name__ == "__main__":
+    main()

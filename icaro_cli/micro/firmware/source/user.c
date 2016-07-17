@@ -66,14 +66,17 @@ salidas digitales del PORTB (unl2803):
 /*funciones*/
 void loop()
 {
-    if (PORTB == 0){
-        PORTB = 1;
-    } else {
-        if (PORTB >= 255){
-            PORTB = 1;
-        } else{
-            PORTB = PORTB * 2;
-        }
-    }
+    //if (PORTB == 0){
+    //    PORTB = 1;
+    //} else {
+    //    if (PORTB >= 255){
+    //        PORTB = 1;
+    //    } else{
+    //        PORTB = PORTB * 2;
+    //    }
+    //}
+    PORTB = 255;
+    Delayms(300);
+    PORTB = 0;
     Delayms(300);
 }

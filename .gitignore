@@ -1,3 +1,4 @@
 *.pyc
 *.swp
 *.swo
+icaro_cli.egg-info/
