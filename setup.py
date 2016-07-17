@@ -15,7 +15,7 @@ setup(
     keywords = "console icaro",
     packages=find_packages(),
     long_description=read('README'),
-    install_requires=['pyusb'],
+    install_requires=['pyusb==1.0.0', 'pystache==0.5.4'],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Topic :: Utilities",

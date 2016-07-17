@@ -3,14 +3,21 @@
 import os
 import sys
 import time
+import platform
 
-#TODO: para mientras por que YOLO
-sys.path.append('/Users/fitoria/code/tallericaro/')
+from pystache.common import TemplateNotFoundError
+from pystache.renderer import Renderer
 
-from icaro.hardware.icaro.modulos import docker
+
+try:
+    from icaro.hardware.icaro.modulos import docker
+except ImportError:
+    #YOLO
+    sys.path.append('/Users/fitoria/code/tallericaro/')
+    from icaro.hardware.icaro.modulos import docker
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_DIR = os.path.join(BASE_DIR, 'micro/templates')
 
 PORT = '/dev/ttyACM0'
 PORT_USB = '/dev/ttyUSB0'
@@ -28,9 +35,15 @@ LIBS_DIR = [os.path.join(BASE_DIR, d) for d in LIBS_DIR]
 TEMPORAL_DIR = '/tmp/icarotemporal'
 ARCHIVO_LKR = os.path.join(BASE_DIR, 'micro/firmware/pic16/lkr/18f2550.lkr')
 LIBPUF = os.path.join(BASE_DIR, 'micro/firmware/pic16/lib/libpuf.lib')
-#TODO: componer estos paths a cargar dinamicamente con algun truco usando locate?
-LIBC18F = os.path.join(BASE_DIR, '/usr/local/Cellar/sdcc/3.5.0/share/sdcc/lib/pic16/libc18f.lib')
-LIBM18F = os.path.join(BASE_DIR, '/usr/local/Cellar/sdcc/3.5.0/share/sdcc/lib/pic16/libm18f.lib')
+
+os_name = platform.system()
+if os_name == 'Darwin':
+    LIBC18F = os.path.join(BASE_DIR, '/usr/local/Cellar/sdcc/3.5.0/share/sdcc/lib/pic16/libc18f.lib')
+    LIBM18F = os.path.join(BASE_DIR, '/usr/local/Cellar/sdcc/3.5.0/share/sdcc/lib/pic16/libm18f.lib')
+else:
+    LIBC18F = os.path.join(BASE_DIR, '/usr/share/sdcc/lib/pic16/libc18f.lib')
+    LIBM18F = os.path.join(BASE_DIR, '/usr/share/sdcc/lib/pic16/libm18f.lib')
+
 USB_DESCRIPTORS = os.path.join(BASE_DIR, 'micro/firmware/pic16/obj/usb_descriptors.o')
 CRT0IPINGUINO = os.path.join(BASE_DIR, 'micro/firmware/pic16/obj/crt0ipinguino.o')
 APPLICATION_IFACE = os.path.join(BASE_DIR, 'micro/firmware/pic16/obj/application_iface.o')
@@ -71,9 +84,18 @@ PARAMETROS_BINARIO = [
 ]
 
 
-
-
 SOURCE_FILE = os.path.join(BASE_DIR, 'micro/firmware/source/main.c')
+SOURCE_TEMPLATE = os.path.join(BASE_DIR, 'micro/firmware/source/main.c')
+
+def crear_plantilla(archivo_fuente='user.c'):
+    print "creando plantilla para archivo %s" % archivo_fuente
+    renderer = Renderer()
+    template = renderer.load_template(SOURCE_TEMPLATE)
+    dato_plantilla = renderer.render(template, {'include_path': archivo_fuente})
+    archivo = open(SOURCE_FILE, 'w')
+    archivo.write(dato_plantilla)
+    archivo.close()
+    print "plantilla creada"
 
 def compilar_archivo(archivo_fuente=SOURCE_FILE, archivo_salida=OUTPUT_FILE):
     '''
@@ -85,8 +107,7 @@ def compilar_archivo(archivo_fuente=SOURCE_FILE, archivo_salida=OUTPUT_FILE):
     except:
         os.mkdir(TEMPORAL_DIR)
 
-    #TODO: probar que detecte que esto
-    compiler = 'sdcc' #'sdcc-sdcc'
+    compiler = 'sdcc' if os_name == 'Darwin' else 'sdcc-sdcc'
     #primer: compilador
     #segundo: parametros
     #tercero: include_dirs
@@ -126,6 +147,10 @@ def cargar(nombre_archivo=HEX_FILE):
     docker.buscar_bus_docker = False
 
 def main():
+    if len(sys.argv)==2:
+        crear_plantilla(os.path.abspath(sys.argv[1]))
+    else:
+        crear_plantilla()
     print "COMPILANDO"
     salida = compilar_archivo()
     os.system(salida)
